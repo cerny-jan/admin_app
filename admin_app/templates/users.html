@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+
+<div class="card mb-3">
+  <div class="card-header">
+    <i class="fa fa-user"></i> Users</div>
+  <div class="card-body">
+    <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">Email</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <th scope="row">{{loop.index}}</th>
+        <td>{{user.username}}</td>
+        <td>{{user.email}}</td>
+        <td class="text-right"><button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username={{user.username}} data-email={{user.email}}><i class="fa fa-pencil"></i> Edit</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+      <td  colspan="3"></td>
+      <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add User</button></td>
+    </tr>
+  </tfoot>
+  </table>
+  </div>
+
+{# form field macro  #}
+
+  {% macro form_field(form, fieldname='', required=True, minlength=0 ) %}
+      {% if form[fieldname].errors %}
+      {{ form[fieldname](size=32,class="form-control is-invalid "+fieldname,required=required, minlength=minlength, id=False) }}
+        {% for error in form[fieldname].errors %}
+             <div class="invalid-feedback">{{error}}</div>
+        {% endfor %}
+      {% else %}
+        {{ form[fieldname](size=32,class="form-control "+fieldname, required=required, minlength=minlength, id=False) }}
+      {% endif %}
+  {% endmacro %}
+
+  <!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLongTitle">Edit user</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm" action="{{ url_for('edituser') }}" method="post">
+          <div class="form-group">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input id="userid" name="userid" type="hidden" value="">
+            <label for="username" class="col-form-label">Username:</label>
+            {{form_field(edit_user_form,'username',True,3)}}
+          </div>
+          <div class="form-group">
+            <label for="email" class="col-form-label">Email:</label>
+            {{form_field(edit_user_form,'email')}}
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger">Remove User</button>
+        {{ edit_user_form.submit(class="btn btn-primary", id=False) }}
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addModalLongTitle">Add New User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      </div>
+      <form action="{{ url_for('adduser') }}" id="addForm" method="post">
+        <div class="modal-body">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="form-group">
+            <label for="username" class="col-form-label">Username:</label>
+              {{form_field(add_user_form,'username',True,3)}}
+          </div>
+          <div class="form-group">
+            <label for="email" class="col-form-label">Email:</label>
+             {{form_field(add_user_form,'email')}}
+          </div>
+          <div class="form-group">
+            <label for="password" class="col-form-label">Password:</label>
+            {{form_field(add_user_form,'password',True,8)}}
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword" class="col-form-label">Confirm password:</label>
+             {{form_field(add_user_form,'confirm_password',True,8)}}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+           {{ add_user_form.submit(class="btn btn-primary", id=False) }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+
+
+{% endblock %}

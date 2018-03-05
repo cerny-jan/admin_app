@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__
+*.sqlite3
+*.pyc
+*.log
+*.swp
+*.retry
+.env
+migrations/*
+docker-data/*
