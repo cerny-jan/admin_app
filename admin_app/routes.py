@@ -5,11 +5,12 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.urls import url_parse
 from admin_app.models import User
 from admin_app import db
+from sqlalchemy.exc import IntegrityError
 
 
-@app.route('/')
+@app.route('/portal')
 @login_required
-def index():
+def portal():
     return render_template('blank.html')
 
 
@@ -27,16 +28,29 @@ def users():
 def edituser():
     form = EditUserForm()
     if form.validate_on_submit():
-        try:
-            user = User.query.filter_by(id=form.userid.data).first()
-            user.username = form.username.data
-            user.email = form.email.data
-            db.session.commit()
-            return jsonify(data='ok')
-        except Exception as e:
-            db.session.rollback()
-            return jsonify(data='error')
-        return jsonify(data={'message': 'hello {}'.format(form.userid.data)})
+        if request.form.get('submitButtonName') == 'removeuser':
+            try:
+                user = User.query.filter_by(id=form.userid.data).first()
+                db.session.delete(user)
+                db.session.commit()
+                return jsonify(status='ok', message='User Removed')
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(status='error',message=str(e.orig))
+        elif request.form.get('submitButtonName') == 'edituser':
+            try:
+                user = User.query.filter_by(id=form.userid.data).first()
+                user.username = form.username.data
+                user.email = form.email.data
+                db.session.commit()
+                return jsonify(status='ok', message='User edited')
+            except IntegrityError as e:
+                formErrors = {k:str(v) + ' already exists' for k,v in e.params.items() if k in ['username','email']}
+                db.session.rollback()
+                return jsonify(status='formErrors', formErrors=formErrors)
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(status='error', message=str(e.orig))
     return jsonify(data=form.errors)
 
 
@@ -50,15 +64,15 @@ def adduser():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        return jsonify(status='ok')
+        return jsonify(status='ok',  message='User Created')
     return jsonify(status='formErrors', formErrors=form.errors)
 
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('portal'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -68,7 +82,8 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
+            next_page = url_for('portal')
+        return redirect(next_page)
     return render_template('login.html', form=form)
 
 

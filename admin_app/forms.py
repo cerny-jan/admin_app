@@ -16,7 +16,8 @@ class EditUserForm(FlaskForm):
     userid = IntegerField()
     email = EmailField('Email', validators=[DataRequired(), Email()])
     username = StringField('Username', validators=[DataRequired()])
-    submit = SubmitField('Save Changes')
+    edituser = SubmitField('Save Changes')
+    removeuser = SubmitField('Remove User')
 
 
 class AddUserForm(FlaskForm):

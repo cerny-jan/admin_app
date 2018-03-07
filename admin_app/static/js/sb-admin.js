@@ -54,12 +54,20 @@
     $('#userid').val(userid);
   });
 
+  $("input[type=submit]").click(function() {
+    $("input[type=submit]").removeAttr("clicked");
+    $(this).attr("clicked", "true");
+  });
+
   $('form').submit(function(e) {
     var currentForm = $(this);
+    var submitButtonName = $("input[type=submit][clicked=true]").attr('name');
+    var data = $(this).serializeArray(); // convert form to array
+    data.push({name: "submitButtonName", value: submitButtonName});
       $.ajax({
           type: "POST",
           url: this.action,
-          data: $(this).serialize(),
+          data:  $.param(data),
           success: function(data) {
             switch (data.status) {
               case 'formErrors':
@@ -72,7 +80,12 @@
                   }
                   break;
               case 'ok':
+                localStorage.setItem('successMessage',data.message)
                 location.reload();
+                break;
+              case 'error':
+                $('.modal').modal('hide');
+                $('.container-fluid').prepend('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error: </strong>'+data.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                 break;
             }
               console.log(data)
@@ -83,9 +96,17 @@
 
 
   // clear modal on close
-  $('#addModal').on('hidden.bs.modal', function (e) {
+  $('.modal').on('hidden.bs.modal', function(e) {
     $(this).find('form').removeClass('validated');
     $(this).find('input:text, input:password, input[name="email"]').val('').removeClass('is-invalid');
   });
+
+  // onload messaging
+  var successMessage = localStorage.getItem('successMessage');
+  if (successMessage) {
+    $('.container-fluid').prepend('<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success: </strong>' + successMessage + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+    localStorage.removeItem('successMessage');
+  }
+
 
 })(jQuery); // End of use strict
