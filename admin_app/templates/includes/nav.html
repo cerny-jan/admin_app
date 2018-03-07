@@ -1,12 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-  <a class="navbar-brand" href="{{ url_for('portal') }}">Admin Portal</a>
+  <a class="navbar-brand" href="{{ url_for('base.portal') }}">Admin Portal</a>
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarResponsive">
     <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
       <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
-        <a class="nav-link" href="{{ url_for('users') }}">
+        <a class="nav-link" href="{{ url_for('base.users') }}">
           <i class="fa fa-fw fa-user"></i>
           <span class="nav-link-text">Users</span>
         </a>
@@ -41,7 +41,7 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="#">Settings</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fa fa-fw fa-sign-out"></i>Logout</a>
+          <a class="dropdown-item" href="{{ url_for('base.logout') }}"><i class="fa fa-fw fa-sign-out"></i>Logout</a>
         </div>
       </li>
 

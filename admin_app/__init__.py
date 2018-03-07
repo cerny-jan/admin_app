@@ -3,39 +3,24 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-import click
-from flask_cli import FlaskCLI
 import os
 
 
-app = Flask(__name__)
-app.config.from_object(os.environ.get('FLASK_CONFIG','config.DevelopmentConfig'))
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-login = LoginManager(app)
-login.login_view = 'login'
-csrf = CSRFProtect(app)
-
-from admin_app import routes, models
+db = SQLAlchemy()
+migrate = Migrate(db)
+csrf = CSRFProtect()
+login_manager = LoginManager()
+login_manager.login_view = 'base.login'
 
 
-@app.cli.command()
-def mycmd():
-    click.echo("Test")
+def create_app(config_filename):
+    app = Flask(__name__)
+    app.config.from_object(config_filename)
+    db.init_app(app)
+    migrate.init_app(app)
+    login_manager.init_app(app)
+    csrf.init_app(app)
+    from admin_app.base import base
+    app.register_blueprint(base)
 
-
-@app.cli.command()
-def createsuperuser():
-    try:
-        username = click.prompt('username', type=str)
-        email = click.prompt('email', type=str)
-        user = models.User(username=username, email=email)
-        password = click.prompt('password', type=str,
-                                hide_input=True,  confirmation_prompt=True)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-        click.echo('Superuser created')
-    except Exception as e:
-        db.session.rollback()
-        click.echo(e)
+    return app

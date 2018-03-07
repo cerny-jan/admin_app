@@ -61,7 +61,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="editForm" action="{{ url_for('edituser') }}" method="post">
+        <form id="editForm" action="{{ url_for('base.edituser') }}" method="post">
           <div class="form-group">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input id="userid" name="userid" type="hidden" value="">
@@ -94,7 +94,7 @@
         <span aria-hidden="true">&times;</span>
       </button>
       </div>
-      <form action="{{ url_for('adduser') }}" id="addForm" method="post">
+      <form action="{{ url_for('base.adduser') }}" id="addForm" method="post">
         <div class="modal-body">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="form-group">

@@ -6,8 +6,11 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+
 class DevelopmentConfig(Config):
-    DEBUG = True
+    # DEBUG var doesn't work, FLASK_DEBUG env var needs to be set
+    pass
+
 
 class TestingConfig(Config):
     TESTING = True
