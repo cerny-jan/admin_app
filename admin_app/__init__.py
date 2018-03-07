@@ -1,21 +1,20 @@
 from flask import Flask
-from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 import click
 from flask_cli import FlaskCLI
+import os
 
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(os.environ.get('FLASK_CONFIG','config.DevelopmentConfig'))
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 csrf = CSRFProtect(app)
-FlaskCLI(app)
 
 from admin_app import routes, models
 
