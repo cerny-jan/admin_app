@@ -1,0 +1,55 @@
+{% extends "base.html" %} {% block content %}
+
+
+
+<div class="card mb-3">
+  <div class="card-header">
+    <i class="fa fa-wrench"></i> Google BigQuery</div>
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Account Name</th>
+          <th scope="col">Conected</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row"></th>
+          <td scope="row"></td>
+          <td class="text-right"><button type="button" class="btn btn-outline-success btn-sm" <i class="fa fa-pencil"></i> Connect</button></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2"></td>
+          <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add New</button></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+    </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Available Datasets</div>
+    <div class="card-body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Account Name</th>
+            <th scope="col">Dataset ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"></th>
+            <td scope="row"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+      </div>
+
+
+    {% endblock %}
