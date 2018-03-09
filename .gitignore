@@ -6,5 +6,6 @@ __pycache__
 *.swp
 *.retry
 .env
+.coverage
 migrations/*
 docker-data/*

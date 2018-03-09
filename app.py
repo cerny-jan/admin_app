@@ -25,3 +25,15 @@ def createsuperuser():
     except Exception as e:
         db.session.rollback()
         click.echo(e)
+
+
+@app.cli.command()
+def test():
+    # python -m unittest discover -v
+    # TODO COVERAGE
+    # coverage run -m unittest discover
+    # coverage report -m
+    click.echo('Running tests')
+    import unittest
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
