@@ -23,3 +23,4 @@ services:
       - DATABASE_URL=postgresql://postgres:pswd@postgres:5432/testdb
       - FLASK_DEBUG=True
       - APP_SECRET="secret_key"
+      - OAUTHLIB_INSECURE_TRANSPORT=1

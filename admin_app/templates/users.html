@@ -41,18 +41,7 @@
   </div>
   </div>
 
-{# form field macro  #}
-
-  {% macro form_field(form, fieldname='', required=True, minlength=0 ) %}
-      {% if form[fieldname].errors %}
-      {{ form[fieldname](size=32,class="form-control is-invalid "+fieldname,required=required, minlength=minlength, id=False) }}
-        {% for error in form[fieldname].errors %}
-             <div class="invalid-feedback">{{error}}</div>
-        {% endfor %}
-      {% else %}
-        {{ form[fieldname](size=32,class="form-control "+fieldname, required=required, minlength=minlength, id=False) }}
-      {% endif %}
-  {% endmacro %}
+{% from 'includes/macros.html' import form_field %}
 
   <!-- Edit Modal -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -69,11 +58,9 @@
           <div class="form-group">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input id="userid" name="userid" type="hidden" value="">
-            <label for="username" class="col-form-label">Username:</label>
             {{form_field(edit_user_form,'username',True,3)}}
           </div>
           <div class="form-group">
-            <label for="email" class="col-form-label">Email:</label>
             {{form_field(edit_user_form,'email')}}
           </div>
       </div>
@@ -102,19 +89,15 @@
         <div class="modal-body">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="form-group">
-            <label for="username" class="col-form-label">Username:</label>
               {{form_field(add_user_form,'username',True,3)}}
           </div>
           <div class="form-group">
-            <label for="email" class="col-form-label">Email:</label>
              {{form_field(add_user_form,'email')}}
           </div>
           <div class="form-group">
-            <label for="password" class="col-form-label">Password:</label>
             {{form_field(add_user_form,'password',True,8)}}
           </div>
           <div class="form-group">
-            <label for="confirmPassword" class="col-form-label">Confirm password:</label>
              {{form_field(add_user_form,'confirm_password',True,8)}}
           </div>
         </div>

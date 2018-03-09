@@ -4,51 +4,90 @@
 
 <div class="card mb-3">
   <div class="card-header">
-    <i class="fa fa-wrench"></i> Google BigQuery</div>
+    <i class="fa fa-wrench"></i> Google BigQuery <span class="badge badge-pill badge-success">Connected</span>
+    <a role="button" class="btn btn-outline-success btn-sm float-right" href="{{ url_for('tools.connect_google') }}"> <i class="fa fa-pencil"></i> Connect</a>
+  </div>
   <div class="card-body">
     <table class="table">
       <thead>
         <tr>
-          <th scope="col">Account Name</th>
-          <th scope="col">Conected</th>
+          <th scope="col">Project Name</th>
+          <th scope="col">Project ID</th>
           <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
+        {% for project in projects %}
         <tr>
-          <th scope="row"></th>
-          <td scope="row"></td>
-          <td class="text-right"><button type="button" class="btn btn-outline-success btn-sm" <i class="fa fa-pencil"></i> Connect</button></td>
+          <td>{{project.name}}</td>
+          <td>{{project.id}}</td>
+          <td class="text-right"><button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username={{user.username}} data-email={{user.email}}><i class="fa fa-pencil"></i> Refresh Datasets</button></td>
         </tr>
+        {% endfor %}
       </tbody>
       <tfoot>
         <tr>
           <td colspan="2"></td>
-          <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add New</button></td>
+          <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add Google Project</button></td>
         </tr>
       </tfoot>
     </table>
   </div>
     </div>
-
+    {% if datasets %}
   <div class="card mb-3">
     <div class="card-header">Available Datasets</div>
     <div class="card-body">
       <table class="table">
         <thead>
           <tr>
-            <th scope="col">Account Name</th>
+            <th scope="col">Project ID</th>
             <th scope="col">Dataset ID</th>
           </tr>
         </thead>
         <tbody>
+          {% for dataset in datasets %}
           <tr>
-            <th scope="row"></th>
-            <td scope="row"></td>
+            <th scope="row">{{dataset.project_id}}</th>
+            <td scope="row">{{dataset.dataset_id}}</td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
+      </div>
+    {% endif %}
+
+{% from 'includes/macros.html' import form_field %}
+
+      <!-- Add Modal -->
+      <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addModalLongTitle">Add Google Project</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <form action="{{ url_for('tools.add_google_project') }}" id="addForm" method="post">
+              <div class="modal-body">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="form-group">
+                    {{form_field(form,'project_name',True,3)}}
+                </div>
+                <div class="form-group">
+                    {{form_field(form,'project_id',True,3)}}
+                </div>
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                 {{ form.submit(class="btn btn-primary", id=False) }}
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
 

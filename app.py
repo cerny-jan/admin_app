@@ -1,9 +1,11 @@
-from admin_app import create_app
+from admin_app import create_app, db
 import os
 import click
 from flask_cli import FlaskCLI
+from flask_migrate import Migrate
 
 app = create_app(os.environ.get('FLASK_CONFIG','config.DevelopmentConfig'))
+migrate = Migrate(app, db)
 
 @app.cli.command()
 def mycmd():

@@ -1,0 +1,14 @@
+
+
+  {% macro form_field(form, fieldname='', required=True, minlength=0 ) %}
+      {% if form[fieldname].errors %}
+      {{ form[fieldname].label(class="col-form-label") }}
+      {{ form[fieldname](size=32,class="form-control is-invalid "+fieldname,required=required, minlength=minlength, id=False) }}
+        {% for error in form[fieldname].errors %}
+             <div class="invalid-feedback">{{error}}</div>
+        {% endfor %}
+      {% else %}
+      {{ form[fieldname].label(class="col-form-label") }}
+        {{ form[fieldname](size=32,class="form-control "+fieldname, required=required, minlength=minlength, id=False) }}
+      {% endif %}
+  {% endmacro %}

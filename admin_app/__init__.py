@@ -6,7 +6,6 @@ from flask_wtf.csrf import CSRFProtect
 
 
 db = SQLAlchemy()
-migrate = Migrate(db)
 csrf = CSRFProtect()
 login_manager = LoginManager()
 login_manager.login_view = 'base.login'
@@ -15,8 +14,8 @@ login_manager.login_view = 'base.login'
 def create_app(config_filename):
     app = Flask(__name__)
     app.config.from_object(config_filename)
+    app.url_map.strict_slashes = False
     db.init_app(app)
-    migrate.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
     from admin_app.base import base
