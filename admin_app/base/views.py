@@ -14,6 +14,12 @@ def portal():
     return render_template('blank.html')
 
 
+@base.route('/profile')
+@login_required
+def profile():
+    return render_template('blank.html')
+
+
 @base.route('/users')
 @login_required
 def users():

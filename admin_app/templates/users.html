@@ -7,7 +7,8 @@
 
 <div class="card mb-3">
   <div class="card-header">
-    <i class="fa fa-user"></i> Users</div>
+    <i class="fa fa-user"></i> Users
+  </div>
   <div class="card-body">
     <table class="table">
     <thead>
@@ -15,6 +16,7 @@
         <th scope="col">#</th>
         <th scope="col">Username</th>
         <th scope="col">Email</th>
+        <th scope="col">Role</th>
         <th scope="col"></th>
       </tr>
     </thead>
@@ -24,17 +26,19 @@
         <th scope="row">{{loop.index}}</th>
         <td>{{user.username}}</td>
         <td>{{user.email}}</td>
+        <td></td>
         <td class="text-right"><button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username={{user.username}} data-email={{user.email}}><i class="fa fa-pencil"></i> Edit</button></td>
       </tr>
       {% endfor %}
     </tbody>
     <tfoot>
     <tr>
-      <td  colspan="3"></td>
+      <td  colspan="4"></td>
       <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add User</button></td>
     </tr>
   </tfoot>
   </table>
+  </div>
   </div>
 
 {# form field macro  #}
@@ -123,7 +127,7 @@
   </div>
 </div>
 
-</div>
+
 
 
 

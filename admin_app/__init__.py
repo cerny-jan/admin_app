@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-import os
 
 
 db = SQLAlchemy()
@@ -22,5 +21,7 @@ def create_app(config_filename):
     csrf.init_app(app)
     from admin_app.base import base
     app.register_blueprint(base)
+    from admin_app.tools import tools
+    app.register_blueprint(tools)
 
     return app
