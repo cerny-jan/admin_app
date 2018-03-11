@@ -1,11 +1,11 @@
-from admin_app import create_app, db
+from admin_app import create_app, db, models
 import os
 import click
-from flask_cli import FlaskCLI
 from flask_migrate import Migrate
 
-app = create_app(os.environ.get('FLASK_CONFIG','config.DevelopmentConfig'))
+app = create_app(os.environ.get('FLASK_CONFIG', 'config.DevelopmentConfig'))
 migrate = Migrate(app, db)
+
 
 @app.cli.command()
 def mycmd():
@@ -19,7 +19,7 @@ def createsuperuser():
         email = click.prompt('email', type=str)
         user = models.User(username=username, email=email)
         password = click.prompt('password', type=str,
-                                hide_input=True,  confirmation_prompt=True)
+                                hide_input=True, confirmation_prompt=True)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()

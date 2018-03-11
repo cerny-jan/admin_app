@@ -31,7 +31,7 @@ class GoogleProject(db.Model):
 class GoogleDataset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dataset_id = db.Column(db.String(64), index=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('google_project.id'))
+    project_id = db.Column(db.String(64), db.ForeignKey('google_project.id'))
 
 
 @login_manager.user_loader

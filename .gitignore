@@ -9,3 +9,4 @@ __pycache__
 .coverage
 migrations/*
 docker-data/*
+secret.env

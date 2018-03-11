@@ -24,3 +24,5 @@ services:
       - FLASK_DEBUG=True
       - APP_SECRET="secret_key"
       - OAUTHLIB_INSECURE_TRANSPORT=1
+    env_file:
+      - secret.env

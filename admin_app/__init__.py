@@ -14,7 +14,6 @@ login_manager.login_view = 'base.login'
 def create_app(config_filename):
     app = Flask(__name__)
     app.config.from_object(config_filename)
-    app.url_map.strict_slashes = False
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
@@ -22,5 +21,7 @@ def create_app(config_filename):
     app.register_blueprint(base)
     from admin_app.tools import tools
     app.register_blueprint(tools)
+    from admin_app.destinations import destinations
+    app.register_blueprint(destinations, url_prefix='/destination')
 
     return app

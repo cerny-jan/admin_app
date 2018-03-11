@@ -476,3 +476,8 @@ footer.sticky-footer {
     width: calc(100% - 55px);
   }
 }
+@media (min-width: 636px) {
+.card-tabs {
+    margin-bottom: -.75rem
+  }
+}
