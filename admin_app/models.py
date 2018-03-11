@@ -8,8 +8,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    google_credentials = db.Column(db.PickleType)
-    google_projects = db.relationship('GoogleProject', backref='user', lazy=True)
+    google_big_queries = db.relationship(
+        'GoogleBigQuery', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -21,11 +21,22 @@ class User(UserMixin, db.Model):
         return '<User {}>'.format(self.username)
 
 
+class GoogleBigQuery(db.Model):
+    id = db.Column(db.String(64), primary_key=True)
+    google_email = db.Column(db.String(120), index=True, unique=True)
+    google_credentials = db.Column(db.PickleType)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    google_projects = db.relationship(
+        'GoogleProject', backref='user', lazy=True)
+
+
 class GoogleProject(db.Model):
     id = db.Column(db.String(64), primary_key=True)
     name = db.Column(db.String(64))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    datasets = db.relationship('GoogleDataset', backref='google_project', lazy=True)
+    google_big_query_id = db.Column(
+        db.Integer, db.ForeignKey('google_big_query.id'))
+    datasets = db.relationship(
+        'GoogleDataset', backref='google_project', lazy=True)
 
 
 class GoogleDataset(db.Model):

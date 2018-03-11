@@ -1,6 +1,7 @@
 from google.oauth2.credentials import Credentials
 from . import db
 from flask_login import current_user
+from models import GoogleBigQuery
 import os
 
 
@@ -15,10 +16,15 @@ def get_google_credentials(token):
     )
 
 
-def token_saver(token):
-    current_user.google_credentials = token
+def token_saver(token, google_email):
+    google_big_query = GoogleBigQuery.query.filter_by(
+        user_id=current_user.id, google_email=None).first()
+    google_big_query.google_email = google_email
+    google_big_query.google_credentials = token
     db.session.commit()
 
 
-def token_getter():
-    return current_user.google_credentials
+def token_getter(google_email):
+    google_big_query = GoogleBigQuery.query.filter_by(
+        user_id=current_user.id, google_email=google_email).first()
+    return google_big_query.google_credentials

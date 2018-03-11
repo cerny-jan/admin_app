@@ -13,6 +13,8 @@ import os
 # OAuth endpoints given in the Google API documentation
 authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
 token_url = "https://accounts.google.com/o/oauth2/token"
+scope = ['https://www.googleapis.com/auth/userinfo.email',
+         'https://www.googleapis.com/auth/bigquery']
 
 
 @destinations.route('/')
@@ -94,7 +96,7 @@ def reload_google(projectid):
 @login_required
 def connect_google():
     google = OAuth2Session(client_id=os.environ.get('GOOGLE_CLIENT_ID'),
-                           scope='https://www.googleapis.com/auth/bigquery',
+                           scope=scope,
                            redirect_uri=url_for('destinations.oauth2callback', _external=True))
 
     authorization_url, state = google.authorization_url(
@@ -119,5 +121,8 @@ def oauth2callback():
                                client_secret=os.environ.get(
                                    'GOOGLE_CLIENT_SECRET'),
                                authorization_response=request.url)
-    token_saver(token)
+
+    google_session = OAuth2Session(os.environ.get('GOOGLE_CLIENT_ID'), token=token)
+    r = google_session.get('https://www.googleapis.com/oauth2/v1/userinfo').json()
+    token_saver(token, r['email'])
     return redirect(url_for('destinations.google'))
