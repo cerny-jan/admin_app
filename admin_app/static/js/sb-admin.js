@@ -54,6 +54,23 @@
     $('#userid').val(userid);
   });
 
+  $('#addProjectModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var google_email = button.data('google_email');
+    var google_big_query_id = button.data('google_big_query_id');
+    $('#google_email').val(google_email);
+    $('#google_big_query_id').val(google_big_query_id);
+  });
+
+  $('#removeProjectModal').on('show.bs.modal', function(event) {
+    var button = $(event.relatedTarget);
+    var google_project_id = button.data('google_project_id');
+    var modal = $(this);
+    var href = modal.find('.modal-footer a').attr('href');
+    href += google_project_id;
+    modal.find('.modal-footer a').attr('href', href);
+  });
+
   $("input[type=submit]").click(function() {
     $("input[type=submit]").removeAttr("clicked");
     $(this).attr("clicked", "true");

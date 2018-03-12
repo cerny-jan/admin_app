@@ -1,6 +1,27 @@
 {% extends "base.html" %} {% block content %}
 
 
-blank page
+
+{% for google_big_query in google_big_queries %}
+
+<div>{{google_big_query.id}}</div>
+<div>{{google_big_query.google_email}}</div>
+<div>{{google_big_query.user_id}}</div>
+<ul style="list-style-type:disc">
+  {% for project in google_big_query.google_projects%}
+  <li>{{project.id}}</li>
+  <ul style="list-style-type:circle">
+  {% for dataset in project.datasets%}
+    <li>{{dataset.dataset_id}}</li>
+  {% endfor %}
+  </ul>
+  {% endfor %}
+</ul>
+
+
+
+{% endfor %}
+
+
 
 {% endblock %}

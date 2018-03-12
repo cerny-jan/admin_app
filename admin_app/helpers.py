@@ -1,7 +1,7 @@
 from google.oauth2.credentials import Credentials
 from . import db
 from flask_login import current_user
-from models import GoogleBigQuery
+from admin_app.models import GoogleBigQuery
 import os
 
 

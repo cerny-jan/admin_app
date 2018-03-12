@@ -3,7 +3,7 @@ from .. import db
 from flask import render_template, redirect, url_for, session, request, jsonify, flash
 from flask_login import login_required, current_user
 from requests_oauthlib import OAuth2Session
-from ..models import User, GoogleProject, GoogleDataset
+from ..models import User, GoogleProject, GoogleDataset, GoogleBigQuery
 from .forms import AddGoogleProjectForm
 from ..helpers import get_google_credentials, token_saver, token_getter
 from google.api_core.exceptions import NotFound
@@ -27,19 +27,16 @@ def destination():
 @login_required
 def google():
     form = AddGoogleProjectForm()
-    is_google_connected = True if current_user.google_credentials else False
-    projects = GoogleProject.query.filter_by(user_id=current_user.id).all()
-    datasets = GoogleDataset.query.join(
-        GoogleProject).filter_by(user_id=current_user.id).all()
-    return render_template('google.html', form=form, projects=projects, datasets=datasets, is_google_connected=is_google_connected)
+    google_big_queries= GoogleBigQuery.query.filter_by(user_id=current_user.id).outerjoin(GoogleProject).outerjoin(GoogleDataset).all()
+    return render_template('google.html', form=form, google_big_queries=google_big_queries)
 
 
-@destinations.route('/google/addproject', methods=['POST'])
+@destinations.route('/google/add-project', methods=['POST'])
 @login_required
 def add_google_project():
     form = AddGoogleProjectForm()
     if form.validate_on_submit():
-        token = token_getter()
+        token = token_getter(form.google_email.data)
         google_credentials = get_google_credentials(token)
         try:
             bigquery_client = bigquery.Client(
@@ -47,7 +44,7 @@ def add_google_project():
             datasets = [
                 dataset.dataset_id for dataset in bigquery_client.list_datasets()]
             google_project = GoogleProject(id=form.project_id.data,
-                                           user_id=current_user.id)
+                                           google_big_query_id=form.google_big_query_id.data)
             db.session.add(google_project)
             for dataset in datasets:
                 google_dataset = GoogleDataset(
@@ -66,18 +63,35 @@ def add_google_project():
     return jsonify(status='formErrors', formErrors=form.errors)
 
 
+@destinations.route('/google/remove-project/<projectid>')
+@login_required
+def remove_google_project(projectid):
+    # check if project exists and the user is owner
+    google_big_query = GoogleBigQuery.query.filter_by(user_id=current_user.id).join(GoogleProject).filter_by(id=projectid).first_or_404()
+    # remove the project
+    try:
+        google_project = GoogleProject.query.filter_by(id=projectid).first()
+        db.session.delete(google_project)
+        db.session.commit()
+        flash('Project removed', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(str(e.orig), 'danger')
+    return redirect(url_for('destinations.google'))
+
+
 @destinations.route('/google/reload-datasets/<projectid>')
 @login_required
-def reload_google(projectid):
-    # check if project exists
-    GoogleProject.query.filter_by(id=projectid).first_or_404()
+def reload_google_datasets(projectid):
+    # check if project exists and the user is owner
+    google_big_query = GoogleBigQuery.query.filter_by(user_id=current_user.id).join(GoogleProject).filter_by(id=projectid).first_or_404()
     # find current datasets and remove them
-    datasets = GoogleDataset.query.join(GoogleProject).filter_by(
-        user_id=current_user.id, id=projectid).all()
+    datasets = GoogleDataset.query.join(GoogleProject).filter_by(id=projectid).join(GoogleBigQuery).filter_by(
+        user_id=current_user.id).all()
     for dataset in datasets:
         db.session.delete(dataset)
     # obtain lastest list of datasets from bigquery
-    token = token_getter()
+    token = token_getter(google_big_query.google_email)
     google_credentials = get_google_credentials(token)
     bigquery_client = bigquery.Client(
         credentials=google_credentials, project=projectid)
@@ -88,8 +102,9 @@ def reload_google(projectid):
             dataset_id=dataset, project_id=projectid)
         db.session.add(google_dataset)
     db.session.commit()
-    flash('Refreshed', 'success')
+    flash('Reloaded', 'success')
     return redirect(url_for('destinations.google'))
+
 
 
 @destinations.route('/google/connect')
