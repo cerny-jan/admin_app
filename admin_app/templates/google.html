@@ -1,49 +1,54 @@
 {% extends "base.html" %} {% block content %}
 
-{% set user_can_add_another_connection = 'True' %}
+{% set user_cannot_add_another_connection = [] %}
 
 {% for google_big_query in google_big_queries %}
     <div class="card mb-3 ">
       <div class="card-header">
         <div class="nav card-tabs justify-content-between">
           <div>
-            <span class="navbar-brand mb-0 h1">Google BigQuery </span> {% if google_big_query.google_credentials %}<span class="badge badge-pill badge-success  align-top">Connected</span>{% else %}<span class="badge badge-pill badge-warning  align-top">Not connected</span>{%
+            <span class="navbar-brand mb-0 h1" >{{google_big_query.name}} </span> {% if google_big_query.google_credentials %}<span class="badge badge-pill badge-success  align-top">Connected</span>{% else %}<span class="badge badge-pill badge-warning  align-top">Not connected</span>{%
             endif %}
           </div>
           <ul class="nav nav-tabs card-header-tabs " id="myTab" role="tablist">
 
             <li class="nav-item">
-              <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+              <a class="nav-link active" id="home-tab-{{google_big_query.id}}" data-toggle="tab" href="#home-{{google_big_query.id}}" role="tab" aria-controls="home-{{google_big_query.id}}" aria-selected="true">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="projects-tab" data-toggle="tab" href="#projects" role="tab" aria-controls="projects" aria-selected="false">Projects</a>
+              <a class="nav-link" id="projects-tab-{{google_big_query.id}}" data-toggle="tab" href="#projects-{{google_big_query.id}}" role="tab" aria-controls="projects-{{google_big_query.id}}" aria-selected="false">Projects</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Available Datasets</a>
+              <a class="nav-link" id="datasets-tab-{{google_big_query.id}}" data-toggle="tab" href="#datasets-{{google_big_query.id}}" role="tab" aria-controls="datasets-{{google_big_query.id}}" aria-selected="false">Available Datasets</a>
             </li>
           </ul>
         </div>
       </div>
       <div class="card-body tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="tab-pane fade show active" id="home-{{google_big_query.id}}" role="tabpanel" aria-labelledby="home-tab-{{google_big_query.id}}">
           <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                Linked Google email: <strong>{{google_big_query.google_email}}</strong>
+                </li>
             <li class="list-group-item">In order to use Google BigQuery as a destination you have to create Google Platform Project and enable BigQuery API. Please follow the<a target="_blank" href="https://cloud.google.com/bigquery/quickstart-web-ui"> documentation</a> for details.
             </li>
             <li class="list-group-item">
               <div class="float-right">
-                <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#renameToolModal" data-toolname="<TOOL NAME>"><i class="fa fa-pencil"></i> Rename Tool</button>
+                <button type="button" class="btn btn-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('destinations.remove_google', google_big_query_id=google_big_query.id) }}" data-remove-title="Remove Tools" data-remove-message="Are you sure you want to do it? This will also remove all projects and datasets associated with this tool and stop any pipeline that is using it."><i class="fa fa-times"></i> Remove Tool</button>
+                <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#renameToolModal" data-tool_name="{% if google_big_query.name %}{{google_big_query.name}}{% else %}Google BigQuery{% endif %}" data-google_big_query_id="{{google_big_query.id}}"><i class="fa fa-pencil"></i> Rename Tool</button>
                 {% if google_big_query.google_credentials %}
-                  <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('destinations.connect_google') }}"> <i class="fa fa-times"></i> Disconnect</a>
+                  <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('destinations.disconnect_google', google_big_query_id=google_big_query.id) }}"> <i class="fa fa-times"></i> Disconnect</a>
                 {% else %}
-                  {% set user_can_add_another_connection = 'False' %}
+                <!-- ugly hack to set gloval var inside the loop -->
+                  {% if  user_cannot_add_another_connection.append(True) %}{% endif %}
                   <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('destinations.connect_google') }}"> <i class="fa fa-plug"></i> Connect</a>
                 {% endif %}
               </div>
             </li>
           </ul>
         </div>
-        <div class="tab-pane fade" id="projects" role="tabpanel" aria-labelledby="projects-tab">
-          {% if google_big_query.google_credentials %}
+        <div class="tab-pane fade" id="projects-{{google_big_query.id}}" role="tabpanel" aria-labelledby="projects-tab-{{google_big_query.id}}">
+          {% if google_big_query.google_email %}
             <table class="table">
                 {% if google_big_query.google_projects %}
                 <thead>
@@ -53,13 +58,13 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    {% for project in google_big_query.google_projects %}
+                  {% for project in google_big_query.google_projects %}
+                   <tr>
                     <td>{{project.id}}</td>
                     <td class="text-right">
                       <div>
-                        <button type="button" class="btn btn-outline-danger  btn-sm"  data-toggle="modal" data-target="#removeProjectModal" data-google_project_id="{{project.id}}"><i class="fa fa-times"></i> Remove Project</button>
-                        <a role="button" class="btn btn-outline-dark btn-sm" href="{{ url_for('destinations.reload_google_datasets', projectid=project.id) }}" data-toggle="tooltip" data-placement="top" title="Reloads available datasets for this project"> <i class="fa fa-refresh"></i> Reload Datasets</a>
+                        <button type="button" class="btn btn-outline-danger  btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('destinations.remove_google_project', projectid=project.id) }}" data-remove-title="Remove Project" data-remove-message="Are you sure you want to do it? This will also remove all datasets associated with this project and stop any pipeline that is using them."><i class="fa fa-times"></i> Remove Project</button>
+                        <a role="button" class="btn btn-outline-dark btn-sm {% if not google_big_query.google_credentials %}disabled{% endif %}" href="{{ url_for('destinations.reload_google_datasets', projectid=project.id) }}" data-toggle="tooltip" data-placement="top" title="Reloads available datasets for this project"> <i class="fa fa-refresh"></i> Reload Datasets</a>
                       </div>
                     </td>
                     {% endfor %}
@@ -73,7 +78,7 @@
                   <tr>
                     <td colspan="1"></td>
                     <td class="text-right">
-                      <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-google_email="{{google_big_query.google_email}}" data-google_big_query_id="{{google_big_query.id}}" data-target="#addProjectModal">Add Google Project</button>
+                      <button type="button" class="btn btn-info btn-sm"  {% if not google_big_query.google_credentials %}disabled{% endif %} data-toggle="modal" data-target="#addProjectModal" data-google_big_query_id="{{google_big_query.id}}">Add Google Project</button>
                     </td>
                   </tr>
                 </tfoot>
@@ -82,37 +87,37 @@
               You have to connect your Google account first in order to be able to add project.
           {% endif %}
         </div>
-        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-          {% if google_big_query.google_credentials and google_big_query.google_projects %}
-          {% set at_least_one_dataset_available = 'False' %}
-            {% for project in google_big_query.google_projects %}
+        <div class="tab-pane fade" id="datasets-{{google_big_query.id}}" role="tabpanel" aria-labelledby="datasets-tab-{{google_big_query.id}}">
+          {% if google_big_query.google_email and google_big_query.google_projects %}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Project ID</th>
+                  <th scope="col">Dataset ID</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for project in google_big_query.google_projects %}
                 {% if project.datasets %}
-                {% set at_least_one_dataset_available = 'True' %}
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Project ID</th>
-                        <th scope="col">Dataset ID</th>
-                      </tr>
-                    </thead>
-                    <tbody>
                         {% for dataset in project.datasets %}
                           <tr>
                             <td scope="row">{{project.id}}</td>
                             <td scope="row">{{dataset.dataset_id}}</td>
                           </tr>
                         {% endfor %}
-                    </tbody>
-                  </table>
-                {% endif %}
-            {% endfor %}
-            {% if not at_least_one_dataset_available %}
-                No datasets available in added project(s)
-            {% endif %}
+                  {% else %}
+                    <tr>
+                      <td scope="row">{{project.id}}</td>
+                      <td scope="row"><em>No datasets available for this project.<em></td>
+                    </tr>
+                  {% endif %}
+              {% endfor %}
+              </tbody>
+          </table>
           {% elif  google_big_query.google_credentials and not  google_big_query.google_projects %}
-            You have to add Google Platform Project first to be able to see available datasets.
+            You have to add at least one project first to be able to see available datasets.
           {% else %}
-            You have to connect your Google account and add Google Platform Project to be able to see available datasets.
+            You have to connect your Google account and add at least one project to be able to see available datasets.
           {% endif %}
         </div>
       </div>
@@ -120,8 +125,8 @@
 {% endfor %}
 
 
-<div class="float-right" data-toggle="tooltip" data-placement="top" title="You can another Google BigQuery connection associated with different Google account">
-  <button type="button" class="btn btn-primary {% if not user_can_add_another_connection %}disabled{% endif %}"  data-toggle="modal" data-target="#addToolModal"></i>Add Another Connection</button>
+<div class="float-right mb-3" data-toggle="tooltip" data-placement="top" title="Add another Google BigQuery connection associated with different Google account">
+  <a role="button" class="btn btn-primary" href="{{ url_for('destinations.connect_google') }}"> Add Another Connection</a>
 </div>
 
 
@@ -145,7 +150,6 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <div class="form-group">
             <input id="google_big_query_id" name="google_big_query_id" type="hidden"  value="">
-            <input id="google_email" name="google_email" type="hidden"  value="">
             {{form_field(form,'project_id',True,3)}}
           </div>
         </div>
@@ -159,28 +163,6 @@
 </div>
 
 
-<!-- Remove Project Modal -->
-<div class="modal fade" id="removeProjectModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title" >Remove Project</h5>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      Are you sure you want to do it? This will also remove all datasets associated with this project and stop any pipeline that is using them.
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      <a role="button" class="btn btn-danger" href="{{ url_for('destinations.remove_google_project', projectid='') }}" > Remove Project</a>
-    </div>
-  </div>
-</div>
-</div>
-
-
 <!-- Rename Tool Modal -->
 <div class="modal fade" id="renameToolModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered" role="document">
@@ -191,46 +173,23 @@
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <form action="" method="post">
+    <form action="{{ url_for('destinations.google_rename_tool') }}" method="post">
       <div class="modal-body">
-
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="form-group">
-
+          <input id="rename_tool_google_big_query_id" name="google_big_query_id" type="hidden"  value="">
+          {{form_field(rename_tool_form,'google_big_query_name',True,1)}}
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-         <button type="button" class="btn btn-primary" data-dismiss="modal">Rename Tool</button>
+         {{ rename_tool_form.submit(class="btn btn-primary", id=False) }}
       </div>
     </form>
   </div>
 </div>
 </div>
 
-<!-- Add Tool Modal -->
-<div class="modal fade" id="addToolModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title" >Add Tool</h5>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <form action="" method="post">
-      <div class="modal-body">
-
-        <div class="form-group">
-
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-         <button type="button" class="btn btn-primary" data-dismiss="modal">Add Tool</button>
-      </div>
-    </form>
-  </div>
-</div>
-</div>
+{% include "includes/remove_modal.html" %}
 
 {% endblock %}

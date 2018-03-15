@@ -21,6 +21,8 @@ def create_app(config_filename):
     app.register_blueprint(base)
     from admin_app.tools import tools
     app.register_blueprint(tools)
+    from admin_app.users import users
+    app.register_blueprint(users, url_prefix='/users')
     from admin_app.destinations import destinations
     app.register_blueprint(destinations, url_prefix='/destination')
 

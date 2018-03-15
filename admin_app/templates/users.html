@@ -10,36 +10,40 @@
     <i class="fa fa-user"></i> Users
   </div>
   <div class="card-body">
-    <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Username</th>
-        <th scope="col">Email</th>
-        <th scope="col">Role</th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for user in users %}
-      <tr>
-        <th scope="row">{{loop.index}}</th>
-        <td>{{user.username}}</td>
-        <td>{{user.email}}</td>
-        <td></td>
-        <td class="text-right"><button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username={{user.username}} data-email={{user.email}}><i class="fa fa-pencil"></i> Edit</button></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-    <tfoot>
-    <tr>
-      <td  colspan="4"></td>
-      <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add User</button></td>
-    </tr>
-  </tfoot>
-  </table>
+      <div class="table-responsive">
+        <table class="table ">
+          <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Username</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col"></th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for user in users %}
+              <tr>
+                <th scope="row">{{loop.index}}</th>
+                <td>{{user.username}}</td>
+                <td>{{user.email}}</td>
+                <td></td>
+                <td class="text-right">
+                  <button type="button" class="btn btn-outline-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('users.remove_user', userid=user.id) }}" data-remove-title="Remove user" data-remove-message="Are you sure you want to remove this user?"><i class="fa fa-times"></i> Remove</button>
+                  <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username={{user.username}} data-email={{user.email}}><i class="fa fa-pencil"></i> Edit</button></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+          <tfoot>
+              <tr>
+                <td  colspan="4"></td>
+                <td class="text-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#addModal">Add User</button></td>
+              </tr>
+          </tfoot>
+      </table>
+    </div>
   </div>
-  </div>
+</div>
 
 {% from 'includes/macros.html' import form_field %}
 
@@ -54,7 +58,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="editForm" action="{{ url_for('base.edituser') }}" method="post">
+        <form id="editForm" action="{{ url_for('users.edit_user') }}" method="post">
           <div class="form-group">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input id="userid" name="userid" type="hidden" value="">
@@ -66,7 +70,6 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        {{ edit_user_form.removeuser(class="btn btn-danger", id=False) }}
         {{ edit_user_form.edituser(class="btn btn-primary", id=False) }}
       </div>
         </form>
@@ -85,7 +88,7 @@
         <span aria-hidden="true">&times;</span>
       </button>
       </div>
-      <form action="{{ url_for('base.adduser') }}" id="addForm" method="post">
+      <form action="{{ url_for('users.add_user') }}" id="addForm" method="post">
         <div class="modal-body">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="form-group">
@@ -110,7 +113,7 @@
   </div>
 </div>
 
-
+{% include "includes/remove_modal.html" %}
 
 
 

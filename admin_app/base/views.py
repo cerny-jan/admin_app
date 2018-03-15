@@ -1,7 +1,7 @@
 from . import base
 from .. import db
 from ..models import User
-from .forms import LoginForm, AddUserForm, EditUserForm
+from .forms import LoginForm
 from flask import render_template, url_for, redirect, jsonify, request, flash
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.urls import url_parse
@@ -12,67 +12,6 @@ from sqlalchemy.exc import IntegrityError
 @login_required
 def portal():
     return render_template('blank.html')
-
-
-@base.route('/profile')
-@login_required
-def profile():
-    return render_template('blank.html')
-
-
-@base.route('/users')
-@login_required
-def users():
-    users = User.query.all()
-    add_user_form = AddUserForm()
-    edit_user_form = EditUserForm()
-    return render_template('users.html', users=users, add_user_form=add_user_form, edit_user_form=edit_user_form)
-
-
-@base.route('/edituser', methods=['POST'])
-@login_required
-def edituser():
-    form = EditUserForm()
-    if form.validate_on_submit():
-        if request.form.get('submitButtonName') == 'removeuser':
-            try:
-                user = User.query.filter_by(id=form.userid.data).first()
-                db.session.delete(user)
-                db.session.commit()
-                return jsonify(status='ok', message='User Removed')
-            except Exception as e:
-                db.session.rollback()
-                return jsonify(status='error', message=str(e.orig))
-        elif request.form.get('submitButtonName') == 'edituser':
-            try:
-                user = User.query.filter_by(id=form.userid.data).first()
-                user.username = form.username.data
-                user.email = form.email.data
-                db.session.commit()
-                return jsonify(status='ok', message='User edited')
-            except IntegrityError as e:
-                formErrors = {k: str(v) + ' already exists' for k,
-                              v in e.params.items() if k in ['username', 'email']}
-                db.session.rollback()
-                return jsonify(status='formErrors', formErrors=formErrors)
-            except Exception as e:
-                db.session.rollback()
-                return jsonify(status='error', message=str(e.orig))
-    return jsonify(data=form.errors)
-
-
-@base.route('/adduser', methods=['POST'])
-@login_required
-def adduser():
-    form = AddUserForm()
-    if form.validate_on_submit():
-        user = User(username=form.username.data,
-                    email=form.email.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        return jsonify(status='ok', message='User Created')
-    return jsonify(status='formErrors', formErrors=form.errors)
 
 
 @base.route('/', methods=['GET', 'POST'])

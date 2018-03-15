@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, session, request, jsonify,
 from flask_login import login_required, current_user
 from requests_oauthlib import OAuth2Session
 from ..models import User, GoogleProject, GoogleDataset
-from ..helpers import get_google_credentials, token_saver, token_getter
+from ..helpers import get_google_credentials, token_saver
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 import os

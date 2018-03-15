@@ -8,6 +8,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    role = db.Column(db.Integer, db.ForeignKey('user_role.id'))
     google_big_queries = db.relationship(
         'GoogleBigQuery', backref='user', lazy=True, cascade="all, delete-orphan")
 
@@ -17,12 +18,20 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    # def get_user_role(self):
+    #     return User.query.filter_by(id=self.id).join(UserRole).first()
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
+class UserRole(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    users = db.relationship('User', uselist=False)
+
 
 class GoogleBigQuery(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(64))
     google_email = db.Column(db.String(120), index=True, unique=True)
     google_credentials = db.Column(db.PickleType)
@@ -40,7 +49,7 @@ class GoogleProject(db.Model):
 
 
 class GoogleDataset(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     dataset_id = db.Column(db.String(64), index=True)
     project_id = db.Column(db.String(64), db.ForeignKey('google_project.id'))
 

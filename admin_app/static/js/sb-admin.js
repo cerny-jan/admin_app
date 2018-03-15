@@ -54,33 +54,44 @@
     $('#userid').val(userid);
   });
 
+
+  $('#renameToolModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var tool_name = button.data('tool_name');
+    var google_big_query_id = button.data('google_big_query_id');
+    var modal = $(this);
+    modal.find('.modal-body input.google_big_query_name').val(tool_name);
+    $('#rename_tool_google_big_query_id').val(google_big_query_id);
+  });
+
   $('#addProjectModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget);
-    var google_email = button.data('google_email');
     var google_big_query_id = button.data('google_big_query_id');
-    $('#google_email').val(google_email);
     $('#google_big_query_id').val(google_big_query_id);
   });
 
-  $('#removeProjectModal').on('show.bs.modal', function(event) {
+  $('#removeModal').on('show.bs.modal', function(event) {
     var button = $(event.relatedTarget);
-    var google_project_id = button.data('google_project_id');
+    var removeUrl = button.data('remove-url');
+    var removeTitle = button.data('remove-title');
+    var removeMessage = button.data('remove-message');
     var modal = $(this);
-    var href = modal.find('.modal-footer a').attr('href');
-    href += google_project_id;
-    modal.find('.modal-footer a').attr('href', href);
+    modal.find('.modal-title').text(removeTitle);
+    modal.find('.modal-body').text(removeMessage);
+    modal.find('.modal-footer a').attr('href', removeUrl);
   });
 
-  $("input[type=submit]").click(function() {
-    $("input[type=submit]").removeAttr("clicked");
-    $(this).attr("clicked", "true");
-  });
+  // $("input[type=submit]").click(function() {
+  //   $("input[type=submit]").removeAttr("clicked");
+  //   $(this).attr("clicked", "true");
+  // });
 
   $('form').submit(function(e) {
     var currentForm = $(this);
-    var submitButtonName = $("input[type=submit][clicked=true]").attr('name');
+    // var submitButtonName = $("input[type=submit][clicked=true]").attr('name');
     var data = $(this).serializeArray(); // convert form to array
-    data.push({name: "submitButtonName", value: submitButtonName});
+    // data.push({name: "submitButtonName", value: submitButtonName});
+    data.push({name: "submitButtonName"});
       $.ajax({
           type: "POST",
           url: this.action,
@@ -96,14 +107,26 @@
                       errorField.after('<div class="invalid-feedback">' + data.formErrors[field] + '</div>');
                   }
                   break;
-              case 'ok':
-                localStorage.setItem('successMessage',data.message)
-                location.reload();
+              case 'success':
+                $('.modal').modal('hide');
+                $('.container-fluid').prepend('<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Error: </strong>'+data.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                 break;
               case 'error':
                 $('.modal').modal('hide');
                 $('.container-fluid').prepend('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error: </strong>'+data.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                 break;
+              case 'reload':
+                  switch (data.category) {
+                        case 'success':
+                          localStorage.setItem('successMessage',data.message);
+                          location.reload();
+                          break;
+                        case 'error':
+                          localStorage.setItem('errorMessage',data.message);
+                          location.reload();
+                          break;
+                  }
+                  break;
             }
               console.log(data)
           }
@@ -123,6 +146,11 @@
   if (successMessage) {
     $('.container-fluid').prepend('<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success: </strong>' + successMessage + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
     localStorage.removeItem('successMessage');
+  }
+  var errorMessage = localStorage.getItem('errorMessage');
+  if (errorMessage) {
+    $('.container-fluid').prepend('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Success: </strong>' + errorMessage + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+    localStorage.removeItem('errorMessage');
   }
 
 

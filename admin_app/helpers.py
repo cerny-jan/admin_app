@@ -19,12 +19,9 @@ def get_google_credentials(token):
 def token_saver(token, google_email):
     google_big_query = GoogleBigQuery.query.filter_by(
         user_id=current_user.id, google_email=None).first()
+    if not google_big_query:
+        google_big_query = GoogleBigQuery.query.filter_by(
+            user_id=current_user.id, google_email=google_email).first()
     google_big_query.google_email = google_email
     google_big_query.google_credentials = token
     db.session.commit()
-
-
-def token_getter(google_email):
-    google_big_query = GoogleBigQuery.query.filter_by(
-        user_id=current_user.id, google_email=google_email).first()
-    return google_big_query.google_credentials
