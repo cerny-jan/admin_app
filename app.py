@@ -1,4 +1,5 @@
 from admin_app import create_app, db, models
+from admin_app.helpers import find_role
 import os
 import click
 from flask_migrate import Migrate
@@ -14,7 +15,7 @@ def mycmd():
 
 @app.cli.command()
 def createsuperuser():
-    if models.UserRole.query.first():
+    if models.Role.query.first():
         try:
             username = click.prompt('username', type=str)
             email = click.prompt('email', type=str)
@@ -22,7 +23,7 @@ def createsuperuser():
             password = click.prompt('password', type=str,
                                     hide_input=True, confirmation_prompt=True)
             user.set_password(password)
-            user.role = 1
+            user.roles.append(find_role('admin'))
             db.session.add(user)
             db.session.commit()
             click.echo('Superuser created')
@@ -30,12 +31,14 @@ def createsuperuser():
             db.session.rollback()
             click.echo(e)
     else:
-        click.echo('run command \'flask setlookups\' first')
+        click.echo('run the command \'initroles\' first')
+
 
 @app.cli.command()
-def setlookups():
-        db.session.add(models.UserRole(name='Admin'))
-        db.session.add(models.UserRole(name='User'))
+def initroles():
+        db.session.add(models.Role(name='admin'))
+        db.session.add(models.Role(name='destinations'))
+        db.session.add(models.Role(name='sources'))
         db.session.commit()
         click.echo('Done')
 

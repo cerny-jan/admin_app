@@ -5,35 +5,40 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarResponsive">
     <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
-      <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Users">
-        <a class="nav-link" href="{{ url_for('users.users_page') }}">
-          <i class="fa fa-fw fa-user"></i>
-          <span class="nav-link-text">Users</span>
-        </a>
-      </li>
-      <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Sources">
-        <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseSources">
-          <i class="fa fa-fw fa-caret-square-o-down"></i>
-          <span class="nav-link-text">Sources</span>
-        </a>
-        <ul class="sidenav-second-level collapse" id="collapseSources">
-          <li>
-            <a href="{{ url_for('tools.callrail') }}">CallRail</a>
-          </li>
-        </ul>
-      </li>
-      <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Destinations">
-        <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseDestinations">
-          <i class="fa fa-fw fa-table"></i>
-          <span class="nav-link-text">Destinations</span>
-        </a>
-        <ul class="sidenav-second-level collapse" id="collapseDestinations">
-          <li>
-            <a href="{{ url_for('destinations.google') }}">Google BQ</a>
-          </li>
-
-        </ul>
-      </li>
+      {% if current_user.is_admin() %}
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Users">
+          <a class="nav-link" href="{{ url_for('users.users_page') }}">
+            <i class="fa fa-fw fa-user"></i>
+            <span class="nav-link-text">Users</span>
+          </a>
+        </li>
+      {% endif %}
+      {% if current_user.has_role('sources') or current_user.is_admin() %}
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Sources">
+          <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseSources">
+            <i class="fa fa-fw fa-caret-square-o-down"></i>
+            <span class="nav-link-text">Sources</span>
+          </a>
+          <ul class="sidenav-second-level collapse" id="collapseSources">
+            <li>
+              <a href="{{ url_for('tools.callrail') }}">CallRail</a>
+            </li>
+          </ul>
+        </li>
+      {% endif %}
+      {% if current_user.has_role('destinations') or current_user.is_admin() %}
+        <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Destinations">
+            <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseDestinations">
+              <i class="fa fa-fw fa-table"></i>
+              <span class="nav-link-text">Destinations</span>
+            </a>
+            <ul class="sidenav-second-level collapse" id="collapseDestinations">
+              <li>
+                <a href="{{ url_for('destinations.google') }}">Google BQ</a>
+              </li>
+            </ul>
+        </li>
+      {% endif %}
       <!-- <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Mapping">
         <a class="nav-link" href="{{ url_for('tools.mapping') }}">
           <i class="fa fa-fw fa-random"></i>
@@ -60,7 +65,7 @@
           {{ current_user.username }}
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{{ url_for('users.profile', userid=current_user.id) }}"><i class="fa fa-fw fa-user"></i>Profile</a>
+          <a class="dropdown-item" href="{{ url_for('users.profile') }}"><i class="fa fa-fw fa-user"></i>Profile</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{{ url_for('base.logout') }}"><i class="fa fa-fw fa-sign-out"></i>Logout</a>
         </div>

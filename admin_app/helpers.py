@@ -1,7 +1,7 @@
 from google.oauth2.credentials import Credentials
 from . import db
 from flask_login import current_user
-from admin_app.models import GoogleBigQuery
+from admin_app.models import GoogleBigQuery, Role
 import os
 
 
@@ -25,3 +25,8 @@ def token_saver(token, google_email):
     google_big_query.google_email = google_email
     google_big_query.google_credentials = token
     db.session.commit()
+
+
+def find_role(name):
+    role = Role.query.filter_by(name = name).first()
+    return role

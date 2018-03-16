@@ -153,5 +153,10 @@
     localStorage.removeItem('errorMessage');
   }
 
-
+  $('.permissions').multiselect({
+      buttonClass: 'btn btn-info',
+      templates: { li: '<li><a class="dropdown-item" tabindex="0"><label style="padding-left: 10px;width: 100%"></label></a></li>' },
+      numberDisplayed: 0
+    });
+    
 })(jQuery); // End of use strict

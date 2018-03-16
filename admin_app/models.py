@@ -8,7 +8,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    role = db.Column(db.Integer, db.ForeignKey('user_role.id'))
+    roles = db.relationship('Role', secondary='user_roles',backref='user',lazy='dynamic')
     google_big_queries = db.relationship(
         'GoogleBigQuery', backref='user', lazy=True, cascade="all, delete-orphan")
 
@@ -18,16 +18,34 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    # def get_user_role(self):
-    #     return User.query.filter_by(id=self.id).join(UserRole).first()
+    def has_role(self, *specified_role_names):
+        roles = self.roles
+        user_role_names = [role.name for role in roles]
+        for role_name in specified_role_names:
+            if role_name in user_role_names:
+                return True
+        return False
+
+    def is_admin(self):
+        roles = self.roles
+        user_role_names = [role.name for role in roles]
+        return True if 'admin' in user_role_names else False
+
+
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
-class UserRole(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+
+class Role(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
-    users = db.relationship('User', uselist=False)
+
+
+class UserRoles(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
 
 class GoogleBigQuery(db.Model):

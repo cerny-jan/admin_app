@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 
@@ -17,7 +20,7 @@
                 <th scope="col">#</th>
                 <th scope="col">Username</th>
                 <th scope="col">Email</th>
-                <th scope="col">Role</th>
+                <th scope="col">Is admin</th>
                 <th scope="col"></th>
               </tr>
           </thead>
@@ -27,7 +30,7 @@
                 <th scope="row">{{loop.index}}</th>
                 <td>{{user.username}}</td>
                 <td>{{user.email}}</td>
-                <td></td>
+                <td>{{user.has_role('admin')}}</td>
                 <td class="text-right">
                   <button type="button" class="btn btn-outline-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('users.remove_user', userid=user.id) }}" data-remove-title="Remove user" data-remove-message="Are you sure you want to remove this user?"><i class="fa fa-times"></i> Remove</button>
                   <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username={{user.username}} data-email={{user.email}}><i class="fa fa-pencil"></i> Edit</button></td>
@@ -103,6 +106,17 @@
           <div class="form-group">
              {{form_field(add_user_form,'confirm_password',True,8)}}
           </div>
+          <div class="form-group">
+            <div><label for="permissions">Permissions</label></div>
+            <select class="form-control permissions" multiple="multiple">
+                <option value="cheese">Cheese</option>
+                <option value="tomatoes">Tomatoes</option>
+                <option value="mozarella">Mozzarella</option>
+                <option value="mushrooms">Mushrooms</option>
+                <option value="pepperoni">Pepperoni</option>
+                <option value="onions">Onions</option>
+            </select>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -117,5 +131,10 @@
 
 
 
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js" ></script>
 
 {% endblock %}

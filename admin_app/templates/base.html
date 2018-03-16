@@ -1,7 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 
-{% include "includes/header.html" %}
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Admin</title>
+  <!-- Bootstrap core CSS-->
+  <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <!-- Custom fonts for this template-->
+  <link href="{{ url_for('static', filename='vendor/font-awesome/css/font-awesome.min.css') }}"rel="stylesheet" type="text/css">
+  <!-- Custom styles for this template-->
+  <link href="{{ url_for('static', filename='css/sb-admin.css') }}" rel="stylesheet">
+  {% block extra_css %}
+  {% endblock %}
+</head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
   <div class="content-wrapper">
@@ -40,7 +55,10 @@
 
 {% include "includes/footer_scripts.html" %}
 <!-- Custom scripts for all pages-->
+{% block extra_scripts %}
+{% endblock %}
 <script src="{{ url_for('static', filename='js/sb-admin.js') }}" ></script>
+
 </div>
 </body>
 

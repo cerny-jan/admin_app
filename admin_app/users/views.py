@@ -1,36 +1,34 @@
 from . import users
 from .. import db
-from ..models import User
+from ..models import User, Role
 from .forms import AddUserForm, EditUserForm
 from flask import render_template, url_for, redirect, jsonify, request, flash
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.urls import url_parse
 from sqlalchemy.exc import IntegrityError
+from ..decorators import requires_role
 
 
 
 @users.route('/')
 @login_required
+@requires_role('admin')
 def users_page():
     users = User.query.all()
     add_user_form = AddUserForm()
     edit_user_form = EditUserForm()
     return render_template('users.html', users=users, add_user_form=add_user_form, edit_user_form=edit_user_form)
 
+
 @users.route('/profile/')
 @login_required
-def profile_redirect():
-    return redirect(url_for('base.portal'))
-
-
-@users.route('/profile/<int:userid>/')
-@login_required
-def profile(userid):
-    return render_template('blank.html')
+def profile():
+    return render_template('profile.html')
 
 
 @users.route('/remove-user/<int:userid>/')
 @login_required
+@requires_role('admin')
 def remove_user(userid):
     try:
         user = User.query.filter_by(id=userid).first_or_404()
@@ -48,6 +46,7 @@ def remove_user(userid):
 
 @users.route('/edit-user/', methods=['POST'])
 @login_required
+@requires_role('admin')
 def edit_user():
     form = EditUserForm()
     if form.validate_on_submit():
@@ -71,6 +70,7 @@ def edit_user():
 
 @users.route('/add-user/', methods=['POST'])
 @login_required
+@requires_role('admin')
 def add_user():
     form = AddUserForm()
     if form.validate_on_submit():

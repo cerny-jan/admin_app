@@ -6,6 +6,7 @@ from requests_oauthlib import OAuth2Session
 from ..models import User, GoogleProject, GoogleDataset, GoogleBigQuery
 from .forms import AddGoogleProjectForm, RenameGoogleBigQueryForm
 from ..helpers import get_google_credentials, token_saver
+from ..decorators import requires_role
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 import os
@@ -22,12 +23,14 @@ scope = ['https://www.googleapis.com/auth/userinfo.email',
 
 @destinations.route('/')
 @login_required
+@requires_role('admin','destinations')
 def destination():
     return redirect(url_for('base.portal'))
 
 
 @destinations.route('/google/')
 @login_required
+@requires_role('admin','destinations')
 def google():
     form = AddGoogleProjectForm()
     rename_tool_form = RenameGoogleBigQueryForm()
@@ -37,6 +40,7 @@ def google():
 
 @destinations.route('/google/rename-tool/', methods=['POST'])
 @login_required
+@requires_role('admin','destinations')
 def google_rename_tool():
     rename_tool_form = RenameGoogleBigQueryForm()
     if rename_tool_form.validate_on_submit():
@@ -54,6 +58,7 @@ def google_rename_tool():
 
 @destinations.route('/google/add-project/', methods=['POST'])
 @login_required
+@requires_role('admin','destinations')
 def add_google_project():
     form = AddGoogleProjectForm()
     google_big_query =  GoogleBigQuery.query.filter_by(user_id=current_user.id, id=form.google_big_query_id.data).first_or_404()
@@ -95,6 +100,7 @@ def add_google_project():
 
 @destinations.route('/google/remove-project/<projectid>/')
 @login_required
+@requires_role('admin','destinations')
 def remove_google_project(projectid):
     # check if project exists and the user is owner
     google_big_query = GoogleBigQuery.query.filter_by(user_id=current_user.id).join(GoogleProject).filter_by(id=projectid).first_or_404()
@@ -112,6 +118,7 @@ def remove_google_project(projectid):
 
 @destinations.route('/google/reload-datasets/<projectid>/')
 @login_required
+@requires_role('admin','destinations')
 def reload_google_datasets(projectid):
     # check if project exists and the user is owner
     google_big_query = GoogleBigQuery.query.filter_by(user_id=current_user.id).join(GoogleProject).filter_by(id=projectid).first_or_404()
@@ -155,6 +162,7 @@ def reload_google_datasets(projectid):
 
 @destinations.route('/google/connect/')
 @login_required
+@requires_role('admin','destinations')
 def connect_google():
     google = OAuth2Session(client_id=os.environ.get('GOOGLE_CLIENT_ID'),
                            scope=scope,
@@ -173,6 +181,7 @@ def connect_google():
 
 @destinations.route('/google/oauth2callback')
 @login_required
+@requires_role('admin','destinations')
 def oauth2callback():
     try:
         google = OAuth2Session(client_id=os.environ.get('GOOGLE_CLIENT_ID'),
@@ -205,6 +214,7 @@ def oauth2callback():
 
 @destinations.route('/google/disconnect/<google_big_query_id>/')
 @login_required
+@requires_role('admin','destinations')
 def disconnect_google(google_big_query_id):
     try:
         google_big_query = GoogleBigQuery.query.filter_by(
@@ -226,6 +236,7 @@ def disconnect_google(google_big_query_id):
 
 @destinations.route('/google/remove/<google_big_query_id>/')
 @login_required
+@requires_role('admin','destinations')
 def remove_google(google_big_query_id):
     try:
         google_big_query = GoogleBigQuery.query.filter_by(
