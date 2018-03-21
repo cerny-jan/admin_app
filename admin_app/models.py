@@ -8,7 +8,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    roles = db.relationship('Role', secondary='user_roles',backref='user',lazy='dynamic')
+    permissions = db.relationship('Permission', secondary='user_permissions',backref='user',lazy='dynamic')
     google_big_queries = db.relationship(
         'GoogleBigQuery', backref='user', lazy=True, cascade="all, delete-orphan")
 
@@ -18,18 +18,23 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def has_role(self, *specified_role_names):
-        roles = self.roles
-        user_role_names = [role.name for role in roles]
-        for role_name in specified_role_names:
-            if role_name in user_role_names:
+    def has_permission(self, *specified_permission_names):
+        permissions = self.permissions
+        user_permission_names = [permission.name for permission in permissions]
+        for permission_name in specified_permission_names:
+            if permission_name in user_permission_names:
                 return True
         return False
 
+    def get_permissions(self):
+        permissions = self.permissions
+        user_permission_names = [permission.name for permission in permissions]
+        return user_permission_names
+
     def is_admin(self):
-        roles = self.roles
-        user_role_names = [role.name for role in roles]
-        return True if 'admin' in user_role_names else False
+        permissions = self.permissions
+        user_permission_names = [permission.name for permission in permissions]
+        return True if 'admin' in user_permission_names else False
 
 
 
@@ -37,15 +42,15 @@ class User(UserMixin, db.Model):
         return '<User {}>'.format(self.username)
 
 
-class Role(db.Model):
+class Permission(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
 
 
-class UserRoles(db.Model):
+class UserPermissions(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
+    permission_id = db.Column(db.Integer(), db.ForeignKey('permission.id', ondelete='CASCADE'))
 
 
 class GoogleBigQuery(db.Model):

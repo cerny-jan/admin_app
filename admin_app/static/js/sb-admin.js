@@ -48,10 +48,12 @@
     var username = button.data('username');
     var email = button.data('email');
     var userid = button.data('userid');
+    var permissions = button.data('userpermissions');
     var modal = $(this);
     modal.find('.modal-body input.username').val(username);
     modal.find('.modal-body input.email').val(email);
     $('#userid').val(userid);
+    modal.find('.permissions').multiselect('select', permissions.split(','));
   });
 
 
@@ -91,7 +93,6 @@
     // var submitButtonName = $("input[type=submit][clicked=true]").attr('name');
     var data = $(this).serializeArray(); // convert form to array
     // data.push({name: "submitButtonName", value: submitButtonName});
-    data.push({name: "submitButtonName"});
       $.ajax({
           type: "POST",
           url: this.action,
@@ -139,6 +140,7 @@
   $('.modal').on('hidden.bs.modal', function(e) {
     $(this).find('form').removeClass('validated');
     $(this).find('input:text, input:password, input[name="email"]').val('').removeClass('is-invalid');
+    $(this).find('.permissions').multiselect('deselectAll', false);
   });
 
   // onload messaging
@@ -153,10 +155,5 @@
     localStorage.removeItem('errorMessage');
   }
 
-  $('.permissions').multiselect({
-      buttonClass: 'btn btn-info',
-      templates: { li: '<li><a class="dropdown-item" tabindex="0"><label style="padding-left: 10px;width: 100%"></label></a></li>' },
-      numberDisplayed: 0
-    });
-    
+
 })(jQuery); // End of use strict

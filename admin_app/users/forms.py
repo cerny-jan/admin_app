@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectMultipleField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import ValidationError, DataRequired, EqualTo, Email
-from ..models import User
+from ..models import User, Permission
 
 
 class EditUserForm(FlaskForm):
@@ -10,6 +10,11 @@ class EditUserForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
     username = StringField('Username', validators=[DataRequired()])
     edituser = SubmitField('Save Changes')
+    permissions = SelectMultipleField('Permissions')
+
+    def __init__(self, *args, **kwargs):
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.permissions.choices =  [(permission.name, permission.name) for permission in Permission.query.all()]
 
 
 class AddUserForm(FlaskForm):
@@ -19,6 +24,11 @@ class AddUserForm(FlaskForm):
     confirm_password = PasswordField(
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Add User')
+    permissions = SelectMultipleField('Permissions')
+
+    def __init__(self, *args, **kwargs):
+        super(AddUserForm, self).__init__(*args, **kwargs)
+        self.permissions.choices = [(permission.name, permission.name) for permission in Permission.query.all()]
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()

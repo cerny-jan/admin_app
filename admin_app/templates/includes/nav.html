@@ -13,7 +13,7 @@
           </a>
         </li>
       {% endif %}
-      {% if current_user.has_role('sources') or current_user.is_admin() %}
+      {% if current_user.has_permission('sources') or current_user.is_admin() %}
         <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Sources">
           <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseSources">
             <i class="fa fa-fw fa-caret-square-o-down"></i>
@@ -26,7 +26,7 @@
           </ul>
         </li>
       {% endif %}
-      {% if current_user.has_role('destinations') or current_user.is_admin() %}
+      {% if current_user.has_permission('destinations') or current_user.is_admin() %}
         <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Destinations">
             <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseDestinations">
               <i class="fa fa-fw fa-table"></i>

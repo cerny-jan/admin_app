@@ -1,5 +1,5 @@
 from admin_app import create_app, db, models
-from admin_app.helpers import find_role
+from admin_app.helpers import find_permission
 import os
 import click
 from flask_migrate import Migrate
@@ -15,7 +15,7 @@ def mycmd():
 
 @app.cli.command()
 def createsuperuser():
-    if models.Role.query.first():
+    if models.Permission.query.first():
         try:
             username = click.prompt('username', type=str)
             email = click.prompt('email', type=str)
@@ -23,7 +23,7 @@ def createsuperuser():
             password = click.prompt('password', type=str,
                                     hide_input=True, confirmation_prompt=True)
             user.set_password(password)
-            user.roles.append(find_role('admin'))
+            user.permissions.append(find_permission('admin'))
             db.session.add(user)
             db.session.commit()
             click.echo('Superuser created')
@@ -31,14 +31,17 @@ def createsuperuser():
             db.session.rollback()
             click.echo(e)
     else:
-        click.echo('run the command \'initroles\' first')
+        click.echo('run the command \'initpermissions\' first')
 
 
 @app.cli.command()
-def initroles():
-        db.session.add(models.Role(name='admin'))
-        db.session.add(models.Role(name='destinations'))
-        db.session.add(models.Role(name='sources'))
+def initpermissions():
+        db.session.add(models.Permission(name='admin'))
+        click.echo('admin added')
+        db.session.add(models.Permission(name='destinations'))
+        click.echo('destinations added')
+        db.session.add(models.Permission(name='sources'))
+        click.echo('sources added')
         db.session.commit()
         click.echo('Done')
 
