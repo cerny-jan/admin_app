@@ -11,6 +11,8 @@ class User(UserMixin, db.Model):
     permissions = db.relationship('Permission', secondary='user_permissions',backref='user',lazy='dynamic')
     google_big_queries = db.relationship(
         'GoogleBigQuery', backref='user', lazy=True, cascade="all, delete-orphan")
+    callrails = db.relationship(
+        'CallRail', backref='user', lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -75,6 +77,14 @@ class GoogleDataset(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     dataset_id = db.Column(db.String(64), index=True)
     project_id = db.Column(db.String(64), db.ForeignKey('google_project.id'))
+
+
+class CallRail(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(64))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    account_id= db.Column(db.String(64))
+    developer_token= db.Column(db.String(64))
 
 
 @login_manager.user_loader

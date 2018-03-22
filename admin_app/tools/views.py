@@ -9,9 +9,6 @@ from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 import os
 
-# OAuth endpoints given in the Google API documentation
-authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
-token_url = "https://accounts.google.com/o/oauth2/token"
 
 
 @tools.route('/mapping')
@@ -30,9 +27,3 @@ def logs():
 @login_required
 def tool():
     return redirect(url_for('base.portal'))
-
-
-@tools.route('/tool/callrail')
-@login_required
-def callrail():
-    return render_template('callrail.html')

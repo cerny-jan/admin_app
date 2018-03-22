@@ -1,134 +1,141 @@
 {% extends "base.html" %} {% block content %}
 
 {% set user_cannot_add_another_connection = [] %}
-
-{% for google_big_query in google_big_queries %}
-    <div class="card mb-3 ">
-      <div class="card-header">
-        <div class="nav card-tabs justify-content-between">
-          <div>
-            <span class="navbar-brand mb-0 h1" >{{google_big_query.name}} </span> {% if google_big_query.google_credentials %}<span class="badge badge-pill badge-success  align-top">Connected</span>{% else %}<span class="badge badge-pill badge-warning  align-top">Not connected</span>{%
-            endif %}
-          </div>
-          <ul class="nav nav-tabs card-header-tabs " id="myTab" role="tablist">
-
-            <li class="nav-item">
-              <a class="nav-link active" id="home-tab-{{google_big_query.id}}" data-toggle="tab" href="#home-{{google_big_query.id}}" role="tab" aria-controls="home-{{google_big_query.id}}" aria-selected="true">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="projects-tab-{{google_big_query.id}}" data-toggle="tab" href="#projects-{{google_big_query.id}}" role="tab" aria-controls="projects-{{google_big_query.id}}" aria-selected="false">Projects</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="datasets-tab-{{google_big_query.id}}" data-toggle="tab" href="#datasets-{{google_big_query.id}}" role="tab" aria-controls="datasets-{{google_big_query.id}}" aria-selected="false">Available Datasets</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="card-body tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="home-{{google_big_query.id}}" role="tabpanel" aria-labelledby="home-tab-{{google_big_query.id}}">
-          <ul class="list-group list-group-flush">
-              <li class="list-group-item">
-                Linked Google email: <strong>{{google_big_query.google_email}}</strong>
-                </li>
-            <li class="list-group-item">In order to use Google BigQuery as a destination you have to create Google Platform Project and enable BigQuery API. Please follow the<a target="_blank" href="https://cloud.google.com/bigquery/quickstart-web-ui"> documentation</a> for details.
-            </li>
-            <li class="list-group-item">
-              <div class="float-right">
-                <button type="button" class="btn btn-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('destinations.remove_google', google_big_query_id=google_big_query.id) }}" data-remove-title="Remove Tools" data-remove-message="Are you sure you want to do it? This will also remove all projects and datasets associated with this tool and stop any pipeline that is using it."><i class="fa fa-times"></i> Remove Tool</button>
-                <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#renameToolModal" data-tool_name="{% if google_big_query.name %}{{google_big_query.name}}{% else %}Google BigQuery{% endif %}" data-google_big_query_id="{{google_big_query.id}}"><i class="fa fa-pencil"></i> Rename Tool</button>
-                {% if google_big_query.google_credentials %}
-                  <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('destinations.disconnect_google', google_big_query_id=google_big_query.id) }}"> <i class="fa fa-times"></i> Disconnect</a>
-                {% else %}
-                <!-- ugly hack to set gloval var inside the loop -->
-                  {% if  user_cannot_add_another_connection.append(True) %}{% endif %}
-                  <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('destinations.connect_google') }}"> <i class="fa fa-plug"></i> Connect</a>
-                {% endif %}
+{% if google_big_queries %}
+    {% for google_big_query in google_big_queries %}
+        <div class="card mb-3 ">
+          <div class="card-header">
+            <div class="nav card-tabs justify-content-between">
+              <div>
+                <span class="navbar-brand mb-0 h1" >{{google_big_query.name}} </span> {% if google_big_query.google_credentials %}<span class="badge badge-pill badge-success  align-top">Connected</span>{% else %}<span class="badge badge-pill badge-warning  align-top">Not connected</span>{%
+                endif %}
               </div>
-            </li>
-          </ul>
-        </div>
-        <div class="tab-pane fade" id="projects-{{google_big_query.id}}" role="tabpanel" aria-labelledby="projects-tab-{{google_big_query.id}}">
-          {% if google_big_query.google_email %}
-            <table class="table">
-                {% if google_big_query.google_projects %}
-                <thead>
-                  <tr>
-                    <th scope="col">Project ID</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for project in google_big_query.google_projects %}
-                   <tr>
-                    <td>{{project.id}}</td>
-                    <td class="text-right">
-                      <div>
-                        <button type="button" class="btn btn-outline-danger  btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('destinations.remove_google_project', projectid=project.id) }}" data-remove-title="Remove Project" data-remove-message="Are you sure you want to do it? This will also remove all datasets associated with this project and stop any pipeline that is using them."><i class="fa fa-times"></i> Remove Project</button>
-                        <a role="button" class="btn btn-outline-dark btn-sm {% if not google_big_query.google_credentials %}disabled{% endif %}" href="{{ url_for('destinations.reload_google_datasets', projectid=project.id) }}" data-toggle="tooltip" data-placement="top" title="Reloads available datasets for this project"> <i class="fa fa-refresh"></i> Reload Datasets</a>
-                      </div>
-                    </td>
-                    {% endfor %}
-                  </tr>
-                </tbody>
-                {% else %}
-                Add Project to load available datasets. You can create or find your Project ID <a target="_blank" href="https://console.cloud.google.com/cloud-resource-manage">here.</i></a>
+              <ul class="nav nav-tabs card-header-tabs " id="myTab" role="tablist">
 
-                {% endif %}
-                <tfoot>
-                  <tr>
-                    <td colspan="1"></td>
-                    <td class="text-right">
-                      <button type="button" class="btn btn-info btn-sm"  {% if not google_big_query.google_credentials %}disabled{% endif %} data-toggle="modal" data-target="#addProjectModal" data-google_big_query_id="{{google_big_query.id}}">Add Google Project</button>
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-          {% else %}
-              You have to connect your Google account first in order to be able to add project.
-          {% endif %}
-        </div>
-        <div class="tab-pane fade" id="datasets-{{google_big_query.id}}" role="tabpanel" aria-labelledby="datasets-tab-{{google_big_query.id}}">
-          {% if google_big_query.google_email and google_big_query.google_projects %}
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Project ID</th>
-                  <th scope="col">Dataset ID</th>
-                </tr>
-              </thead>
-              <tbody>
-              {% for project in google_big_query.google_projects %}
-                {% if project.datasets %}
-                        {% for dataset in project.datasets %}
-                          <tr>
-                            <td scope="row">{{project.id}}</td>
-                            <td scope="row">{{dataset.dataset_id}}</td>
-                          </tr>
+                <li class="nav-item">
+                  <a class="nav-link active" id="home-tab-{{google_big_query.id}}" data-toggle="tab" href="#home-{{google_big_query.id}}" role="tab" aria-controls="home-{{google_big_query.id}}" aria-selected="true">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="projects-tab-{{google_big_query.id}}" data-toggle="tab" href="#projects-{{google_big_query.id}}" role="tab" aria-controls="projects-{{google_big_query.id}}" aria-selected="false">Projects</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="datasets-tab-{{google_big_query.id}}" data-toggle="tab" href="#datasets-{{google_big_query.id}}" role="tab" aria-controls="datasets-{{google_big_query.id}}" aria-selected="false">Available Datasets</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-body tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home-{{google_big_query.id}}" role="tabpanel" aria-labelledby="home-tab-{{google_big_query.id}}">
+              <ul class="list-group list-group-flush">
+                  <li class="list-group-item">
+                    Linked Google email: <strong>{{google_big_query.google_email}}</strong>
+                    </li>
+                <li class="list-group-item">In order to use Google BigQuery as a destination you have to create Google Platform Project and enable BigQuery API. Please follow the<a target="_blank" href="https://cloud.google.com/bigquery/quickstart-web-ui"> documentation</a> for details.
+                </li>
+                <li class="list-group-item">
+                  <div class="float-right">
+                    <button type="button" class="btn btn-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('destinations.remove_google', google_big_query_id=google_big_query.id) }}" data-remove-title="Remove Tools" data-remove-message="Are you sure you want to do it? This will also remove all projects and datasets associated with this tool and stop any pipeline that is using it."><i class="fa fa-times"></i> Remove Tool</button>
+                    <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#renameToolModal" data-tool_name="{% if google_big_query.name %}{{google_big_query.name}}{% else %}Google BigQuery{% endif %}" data-google_big_query_id="{{google_big_query.id}}"><i class="fa fa-pencil"></i> Rename Tool</button>
+                    {% if google_big_query.google_credentials %}
+                      <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('destinations.disconnect_google', google_big_query_id=google_big_query.id) }}"> <i class="fa fa-times"></i> Disconnect</a>
+                    {% else %}
+                    <!-- ugly hack to set gloval var inside the loop -->
+                      {% if  user_cannot_add_another_connection.append(True) %}{% endif %}
+                      <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('destinations.connect_google') }}"> <i class="fa fa-plug"></i> Connect</a>
+                    {% endif %}
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="tab-pane fade" id="projects-{{google_big_query.id}}" role="tabpanel" aria-labelledby="projects-tab-{{google_big_query.id}}">
+              {% if google_big_query.google_email %}
+                <table class="table">
+                    {% if google_big_query.google_projects %}
+                    <thead>
+                      <tr>
+                        <th scope="col">Project ID</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for project in google_big_query.google_projects %}
+                       <tr>
+                        <td>{{project.id}}</td>
+                        <td class="text-right">
+                          <div>
+                            <button type="button" class="btn btn-outline-danger  btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('destinations.remove_google_project', projectid=project.id) }}" data-remove-title="Remove Project" data-remove-message="Are you sure you want to do it? This will also remove all datasets associated with this project and stop any pipeline that is using them."><i class="fa fa-times"></i> Remove Project</button>
+                            <a role="button" class="btn btn-outline-dark btn-sm {% if not google_big_query.google_credentials %}disabled{% endif %}" href="{{ url_for('destinations.reload_google_datasets', projectid=project.id) }}" data-toggle="tooltip" data-placement="top" title="Reloads available datasets for this project"> <i class="fa fa-refresh"></i> Reload Datasets</a>
+                          </div>
+                        </td>
                         {% endfor %}
-                  {% else %}
+                      </tr>
+                    </tbody>
+                    {% else %}
+                    Add Project to load available datasets. You can create or find your Project ID <a target="_blank" href="https://console.cloud.google.com/cloud-resource-manage">here.</i></a>
+
+                    {% endif %}
+                    <tfoot>
+                      <tr>
+                        <td colspan="1"></td>
+                        <td class="text-right">
+                          <button type="button" class="btn btn-info btn-sm"  {% if not google_big_query.google_credentials %}disabled{% endif %} data-toggle="modal" data-target="#addProjectModal" data-google_big_query_id="{{google_big_query.id}}">Add Google Project</button>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+              {% else %}
+                  You have to connect your Google account first in order to be able to add project.
+              {% endif %}
+            </div>
+            <div class="tab-pane fade" id="datasets-{{google_big_query.id}}" role="tabpanel" aria-labelledby="datasets-tab-{{google_big_query.id}}">
+              {% if google_big_query.google_email and google_big_query.google_projects %}
+                <table class="table">
+                  <thead>
                     <tr>
-                      <td scope="row">{{project.id}}</td>
-                      <td scope="row"><em>No datasets available for this project.<em></td>
+                      <th scope="col">Project ID</th>
+                      <th scope="col">Dataset ID</th>
                     </tr>
-                  {% endif %}
-              {% endfor %}
-              </tbody>
-          </table>
-          {% elif  google_big_query.google_credentials and not  google_big_query.google_projects %}
-            You have to add at least one project first to be able to see available datasets.
-          {% else %}
-            You have to connect your Google account and add at least one project to be able to see available datasets.
-          {% endif %}
+                  </thead>
+                  <tbody>
+                  {% for project in google_big_query.google_projects %}
+                    {% if project.datasets %}
+                            {% for dataset in project.datasets %}
+                              <tr>
+                                <td scope="row">{{project.id}}</td>
+                                <td scope="row">{{dataset.dataset_id}}</td>
+                              </tr>
+                            {% endfor %}
+                      {% else %}
+                        <tr>
+                          <td scope="row">{{project.id}}</td>
+                          <td scope="row"><em>No datasets available for this project.<em></td>
+                        </tr>
+                      {% endif %}
+                  {% endfor %}
+                  </tbody>
+              </table>
+              {% elif  google_big_query.google_credentials and not  google_big_query.google_projects %}
+                You have to add at least one project first to be able to see available datasets.
+              {% else %}
+                You have to connect your Google account and add at least one project to be able to see available datasets.
+              {% endif %}
+            </div>
+          </div>
         </div>
-      </div>
+    {% endfor %}
+
+
+    <div class="float-right mb-3" data-toggle="tooltip" data-placement="top" title="Add another Google BigQuery connection associated with different Google account">
+      <a role="button" class="btn btn-primary" href="{{ url_for('destinations.connect_google') }}"> Add Another Connection</a>
     </div>
-{% endfor %}
+{% else %}
+<div class="row justify-content-center">
+      <div class=" mb-3 mt-5" data-toggle="tooltip" data-placement="top" title="Add another Google BigQuery connection associated with different Google account">
+        <a role="button" class="btn btn-primary btn-lg" href="{{ url_for('destinations.connect_google') }}"> Add New Connection</a>
+      </div>
 
-
-<div class="float-right mb-3" data-toggle="tooltip" data-placement="top" title="Add another Google BigQuery connection associated with different Google account">
-  <a role="button" class="btn btn-primary" href="{{ url_for('destinations.connect_google') }}"> Add Another Connection</a>
 </div>
-
+{% endif %}
 
 
 <!--  ************************ modals *************************** -->

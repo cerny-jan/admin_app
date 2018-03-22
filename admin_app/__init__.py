@@ -25,5 +25,7 @@ def create_app(config_filename):
     app.register_blueprint(users, url_prefix='/users')
     from admin_app.destinations import destinations
     app.register_blueprint(destinations, url_prefix='/destination')
+    from admin_app.sources import sources
+    app.register_blueprint(sources, url_prefix='/sources')
 
     return app
