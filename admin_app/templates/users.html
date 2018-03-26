@@ -32,7 +32,7 @@
                 <td>{{user.email}}</td>
                 <td>{{user.has_permission('admin')}}</td>
                 <td class="text-right">
-                  <button type="button" class="btn btn-outline-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('users.remove_user', userid=user.id) }}" data-remove-title="Remove user" data-remove-message="Are you sure you want to remove this user?"><i class="fa fa-times"></i> Remove</button>
+                  {% if user.email != current_user.email%}<button type="button" class="btn btn-outline-danger btn-sm"  data-toggle="modal" data-target="#removeModal" data-remove-url="{{ url_for('users.remove_user', userid=user.id) }}" data-remove-title="Remove user" data-remove-message="Are you sure you want to remove this user?"><i class="fa fa-times"></i> Remove</button>{%endif%}
                   <button type="button" class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#editModal" data-userid="{{user.id}}" data-username="{{user.username}}" data-email="{{user.email}}" data-userpermissions="{{user.get_permissions()|join(',') }}"><i class="fa fa-pencil"></i> Edit</button></td>
               </tr>
               {% endfor %}
@@ -125,6 +125,7 @@
       </form>
     </div>
   </div>
+</div>
 </div>
 
 {% include "includes/remove_modal.html" %}
